@@ -4,27 +4,22 @@ from utility import *
 from plot import plot_colinear_index, plot_selected_vars, plot_gcv
 
 def selection_vars(X, y, lambda_opt, top_k=8):
-    """Selecciona las top_k variables usando el índice co-lineal ponderado"""
     n_vars = X.shape[1]
     remaining_vars = list(range(n_vars))
-    selected_vars = []
-    colinear_indices = []
+    I_full = None  # para graficar
 
-    I, vif, var_beta = weighted_colinear_index(X, y, lambda_opt)
-    colinear_indices.append(I.copy())
+    for _ in range(n_vars - top_k):
+        I, _, _ = weighted_colinear_index(X[:, remaining_vars], y, lambda_opt)
+        idx_max = np.argmax(I)
+        del remaining_vars[idx_max]
+        I_full = I  # el último I calculado
 
-    for _ in range(top_k):
-        min_idx = np.argmin(I[remaining_vars])
-        selected_var = remaining_vars[min_idx]
-        selected_vars.append(selected_var)
-        remaining_vars.remove(selected_var)
+    # Creamos vector I_global con tamaño total
+    I_plot = np.full(n_vars, np.nan)
+    for i, idx in enumerate(remaining_vars):
+        I_plot[idx] = I_full[i]  # colocamos valores en posición original
 
-        if remaining_vars:
-            X_remaining = X[:, remaining_vars]
-            I_new, _, _ = weighted_colinear_index(X_remaining, y, lambda_opt)
-            I[remaining_vars] = I_new
-
-    return selected_vars, colinear_indices[0]
+    return remaining_vars, I_plot  # ← ahora puedes graficar sin error
 
 def main():
     # 1. Cargar datos

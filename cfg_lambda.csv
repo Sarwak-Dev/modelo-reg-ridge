@@ -1,2 +1,2 @@
-Lamb_min,Lam_max,TopK
-0.0001,10000,8
+Lambda_min,Lambda_max,Cantidad_Lambda,TopK
+0.1,1000,20,7
